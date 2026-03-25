@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>화학사고 대응 AI비서 | 군포시</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d2b5e;
+  --navy2: #163872;
+  --navy-light: #e8edf6;
+  --red: #c0392b;
+  --red-bg: #fdf2f0;
+  --orange: #d35400;
+  --yellow: #b7770d;
+  --green: #1a7a4a;
+  --blue: #1a56a0;
+  --border: #dde3ef;
+  --border2: #eef1f7;
+  --bg: #f4f6fa;
+  --white: #ffffff;
+  --text: #1a2035;
+  --text2: #3a4d6a;
+  --text3: #6b7d95;
+  --muted: #a0aec0;
+  --safe-h: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  width: 100%;
+  top: 0; left: 0;
+}
+
+/* ── 헤더 ── */
+.header {
+  background: var(--navy);
+  padding: calc(12px + var(--safe-h)) 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-shield {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.header-info {}
+.header-title { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.2px; }
+.header-sub { font-size: 10px; color: rgba(255,255,255,0.55); margin-top: 1px; letter-spacing: 0.2px; }
+.header-status {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 100px;
+  padding: 5px 10px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: blink 2s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.status-txt { font-size: 10px; color: rgba(255,255,255,0.75); font-weight: 500; }
+
+/* ── 긴급 알림 배너 ── */
+.emergency-bar {
+  background: var(--red-bg);
+  border-bottom: 1px solid #f5c6be;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.e-tag {
+  background: var(--red);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.e-contacts {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.e-contacts::-webkit-scrollbar { display: none; }
+.e-contact {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  color: var(--red);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.e-contact .n { font-size: 12px; }
+
+/* ── 탭 네비게이션 ── */
+.tab-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 0 4px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text3);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  min-width: 60px;
+}
+.tab-btn.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+  font-weight: 700;
+}
+.tab-icon { font-size: 14px; }
+
+/* ── 탭 패널 ── */
+.tab-panels {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.tab-panel.active { display: flex; }
+
+/* ── 챗봇 패널 ── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 환영 화면 */
+.welcome { display: flex; flex-direction: column; gap: 10px; }
+.welcome-card {
+  background: var(--navy);
+  border-radius: 12px;
+  padding: 18px 16px;
+  color: white;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.welcome-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.welcome-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.welcome-desc { font-size: 12px; line-height: 1.65; color: rgba(255,255,255,0.7); }
+
+.notice-bar {
+  background: var(--red-bg);
+  border: 1px solid #f5bdb6;
+  border-left: 3px solid var(--red);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  color: var(--red);
+  line-height: 1.6;
+  display: flex;
+  gap: 6px;
+}
+
+.quick-label { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 1px; padding: 2px 0; }
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quick-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  active-state: none;
+}
+.quick-card:active { background: var(--navy-light); border-color: var(--navy); transform: scale(0.97); }
+.quick-card .qc-icon { font-size: 20px; flex-shrink: 0; }
+.quick-card .qc-title { font-size: 11.5px; font-weight: 700; color: var(--navy); margin-bottom: 2px; line-height: 1.3; }
+.quick-card .qc-desc { font-size: 10px; color: var(--text3); line-height: 1.4; }
+
+/* 메시지 버블 */
+.msg { display: flex; flex-direction: column; gap: 4px; animation: msgin 0.2s ease; }
+@keyframes msgin { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.msg.user { align-items: flex-end; }
+.msg.ai { align-items: flex-start; }
+
+.msg-meta {
+  font-size: 10px;
+  color: var(--muted);
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.msg.user .msg-meta { flex-direction: row-reverse; }
+.meta-role { font-size: 9px; font-weight: 700; color: var(--text3); }
+
+.msg-bubble {
+  max-width: 88%;
+  padding: 11px 13px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.msg.user .msg-bubble {
+  background: var(--navy);
+  color: white;
+  border-radius: 14px 14px 4px 14px;
+}
+.msg.ai .msg-bubble {
+  background: var(--white);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px 14px 14px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* AI 답변 내 색상 태그 */
+.tag-red { color: var(--red); font-weight: 700; }
+.tag-orange { color: var(--orange); font-weight: 700; }
+.tag-green { color: var(--green); font-weight: 700; }
+.tag-blue { color: var(--blue); font-weight: 700; }
+.code-chip {
+  display: inline-block;
+  background: var(--navy-light);
+  color: var(--navy);
+  font-size: 9.5px;
+  padding: 1px 6px;
+  border-radius: 100px;
+  border: 1px solid #c6d4eb;
+  font-weight: 700;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+/* 타이핑 */
+.typing-wrap { align-items: flex-start; }
+.typing-bubble {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px 14px 14px 14px;
+  padding: 13px 16px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.t-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--navy);
+  opacity: 0.3;
+  animation: tdot 1.2s ease-in-out infinite;
+}
+.t-dot:nth-child(2){animation-delay:.2s}
+.t-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-4px);opacity:1}}
+
+/* 입력창 */
+.input-area {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px calc(10px + var(--safe-b));
+  flex-shrink: 0;
+}
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+#chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  padding: 10px 16px;
+  resize: none;
+  outline: none;
+  line-height: 1.4;
+  max-height: 100px;
+  overflow-y: auto;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+#chat-input:focus { border-color: var(--navy); background: white; }
+#chat-input::placeholder { color: var(--muted); }
+.send-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--navy);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.send-btn:active { background: var(--navy2); transform: scale(0.95); }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; }
+.send-btn svg { width: 18px; height: 18px; fill: white; transform: rotate(45deg); }
+.send-btn:disabled svg { fill: var(--muted); }
+.input-hint {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 5px;
+  letter-spacing: 0.2px;
+}
+
+/* ── 시나리오 패널 ── */
+.scenario-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.phase-section { margin-bottom: 14px; }
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+.phase-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.badge-red { background: var(--red); color: white; }
+.badge-orange { background: var(--orange); color: white; }
+.badge-green { background: var(--green); color: white; }
+.badge-blue { background: var(--blue); color: white; }
+.phase-title { font-size: 13px; font-weight: 700; color: var(--navy); }
+
+.scenario-grid { display: flex; flex-direction: column; gap: 6px; }
+.s-btn {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 13px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12.5px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  line-height: 1.4;
+  transition: all 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.s-btn:active { background: var(--navy-light); border-color: var(--navy); }
+.s-btn .s-text { flex: 1; }
+.s-btn .s-arrow { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+.s-btn:active .s-arrow { color: var(--navy); }
+.s-code {
+  font-size: 9px;
+  background: var(--navy-light);
+  color: var(--navy);
+  padding: 2px 6px;
+  border-radius: 100px;
+  font-weight: 700;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+/* ── 연락망 패널 ── */
+.contact-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.contact-section { margin-bottom: 16px; }
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+.contact-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.contact-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border2);
+  text-decoration: none;
+}
+.contact-row:last-child { border-bottom: none; }
+.contact-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.ci-red { background: #fdf2f0; }
+.ci-navy { background: var(--navy-light); }
+.ci-green { background: #e8f5ee; }
+.ci-orange { background: #fef3e8; }
+.contact-info { flex: 1; }
+.contact-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.contact-dept { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.contact-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* 경보 수준 카드 */
+.level-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.level-card {
+  border-radius: 10px;
+  padding: 12px 11px;
+  border: 1px solid transparent;
+}
+.lc-blue { background: #eef4ff; border-color: #c5d8f5; }
+.lc-yellow { background: #fefce8; border-color: #f0d97a; }
+.lc-orange { background: #fef3e8; border-color: #f5c89a; }
+.lc-red { background: #fdf2f0; border-color: #f5bdb6; }
+.lc-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 100px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.lc-blue .lc-badge { background: #1a56a0; color: white; }
+.lc-yellow .lc-badge { background: #b7770d; color: white; }
+.lc-orange .lc-badge { background: var(--orange); color: white; }
+.lc-red .lc-badge { background: var(--red); color: white; }
+.lc-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.lc-desc { font-size: 10.5px; color: var(--text3); line-height: 1.5; }
+
+/* ── 매뉴얼 정보 패널 ── */
+.info-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.info-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 14px;
+  margin-bottom: 10px;
+}
+.info-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.info-card-title .icon { font-size: 16px; }
+.info-list { display: flex; flex-direction: column; gap: 5px; }
+.info-item {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.55;
+  display: flex;
+  gap: 6px;
+}
+.info-item::before { content: '•'; color: var(--navy); flex-shrink: 0; }
+.manual-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--navy-light);
+  border: 1px solid #c6d4eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--navy);
+  font-weight: 500;
+  margin: 3px;
+}
+
+/* 스크롤바 */
+.messages::-webkit-scrollbar, .scenario-panel::-webkit-scrollbar,
+.contact-panel::-webkit-scrollbar, .info-panel::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-shield">🏛</div>
+    <div class="header-info">
+      <div class="header-title">화학사고 대응 AI비서</div>
+      <div class="header-sub">군포시 현장조치 행동매뉴얼 기반</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot"></div>
+    <span class="status-txt">운영중</span>
+  </div>
+</div>
+
+<!-- 긴급 연락 바 -->
+<div class="emergency-bar">
+  <span class="e-tag">긴급</span>
+  <div class="e-contacts">
+    <a class="e-contact" href="tel:119"><span class="n">🚒</span> 군포소방서 119</a>
+    <a class="e-contact" href="tel:031-397-9119"><span class="n">📞</span> 소방 031-397-9119</a>
+    <a class="e-contact" href="tel:031-390-0732"><span class="n">🏛</span> 환경과 0732</a>
+    <a class="e-contact" href="tel:043-830-4132"><span class="n">☣</span> 화학물질안전원</a>
+  </div>
+</div>
+
+<!-- 탭 네비게이션 -->
+<div class="tab-nav" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('chat',this)" role="tab">
+    <span class="tab-icon">💬</span> AI비서
+  </button>
+  <button class="tab-btn" onclick="switchTab('scenario',this)" role="tab">
+    <span class="tab-icon">📋</span> 시나리오
+  </button>
+  <button class="tab-btn" onclick="switchTab('contact',this)" role="tab">
+    <span class="tab-icon">📞</span> 연락망
+  </button>
+  <button class="tab-btn" onclick="switchTab('info',this)" role="tab">
+    <span class="tab-icon">📖</span> 매뉴얼정보
+  </button>
+</div>
+
+<!-- 탭 패널들 -->
+<div class="tab-panels">
+
+  <!-- ① AI비서 채팅 -->
+  <div class="tab-panel active" id="panel-chat">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-card">
+          <div class="welcome-icon">🏛</div>
+          <div>
+            <div class="welcome-title">군포시 화학사고 대응 AI비서</div>
+            <div class="welcome-desc">「화학사고 재난 현장조치 행동매뉴얼」(2025.7 최신판)을 기반으로 답변합니다. 시·군·구청 담당 공무원을 위한 단계별 행동요령, 연락체계, 보고 절차를 즉시 안내합니다.</div>
+          </div>
+        </div>
+        <div class="notice-bar">⚠ <span>실제 사고 발생 시 즉시 <strong>119</strong> 신고 후 AI비서를 활용하십시오. 이 도구는 매뉴얼 조회 보조 수단입니다.</span></div>
+        <div class="quick-label">자주 묻는 질문</div>
+        <div class="quick-grid">
+          <div class="quick-card" onclick="sendQ('화학사고 발생 신고를 접수했습니다. 즉시 해야 할 조치 순서를 알려주세요.')">
+            <div class="qc-icon">🚨</div>
+            <div><div class="qc-title">신고 접수 후<br>즉시 조치</div><div class="qc-desc">최초 5분 행동</div></div>
+          </div>
+          <div class="quick-card" onclick="sendQ('주민 대피명령을 발령하려 합니다. 발령 절차와 표준 방송 문안을 알려주세요.')">
+            <div class="qc-icon">📢</div>
+            <div><div class="qc-title">대피명령<br>발령 절차</div><div class="qc-desc">방송 문안 포함</div></div>
+          </div>
+          <div class="quick-card" onclick="sendQ('화학사고 발생 후 상급기관에 보고해야 합니다. 보고체계와 보고서 양식을 알려주세요.')">
+            <div class="qc-icon">📄</div>
+            <div><div class="qc-title">상급기관<br>보고체계</div><div class="qc-desc">NDMS·보고서</div></div>
+          </div>
+          <div class="quick-card" onclick="sendQ('군포시 화학사고 대응 유관기관별 역할과 연락처를 알려주세요.')">
+            <div class="qc-icon">🤝</div>
+            <div><div class="qc-title">유관기관<br>역할·연락처</div><div class="qc-desc">기관별 임무</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="input-area">
+      <div class="input-row">
+        <textarea id="chat-input" placeholder="상황을 입력하세요. 예) 산본동 공장에서 화학물질 누출 신고 접수됨" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg>
+        </button>
+      </div>
+      <div class="input-hint">매뉴얼 코드번호(예: ①-1-3)로 조회 가능 · 긴급: 119</div>
+    </div>
+  </div>
+
+  <!-- ② 시나리오 -->
+  <div class="tab-panel" id="panel-scenario">
+    <div class="scenario-panel">
+
+      <div class="phase-section">
+        <div class="phase-header">
+          <span class="phase-badge badge-red">1단계</span>
+          <span class="phase-title">징후 감지</span>
+        </div>
+        <div class="scenario-grid">
+          <button class="s-btn" onclick="toChat('화학사고 징후를 감지하고 신고를 접수했습니다. 코드 ①-1-2에 따른 접수 확인사항과 즉시 조치사항을 알려주세요.')">
+            <span class="s-code">①-1-2</span>
+            <span class="s-text">징후 접수 및 확인사항</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 징후를 보고해야 합니다. ①-1-3 전파·보고체계와 보고서 양식을 알려주세요.')">
+            <span class="s-code">①-1-3</span>
+            <span class="s-text">징후 보고·전파 체계</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 위기징후를 분석하고 평가해야 합니다. ①-1-4 정보분석·평가회의 절차를 알려주세요.')">
+            <span class="s-code">①-1-4</span>
+            <span class="s-text">정보분석·평가회의</span>
+            <span class="s-arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="phase-section">
+        <div class="phase-header">
+          <span class="phase-badge badge-orange">2단계</span>
+          <span class="phase-title">초기 대응</span>
+        </div>
+        <div class="scenario-grid">
+          <button class="s-btn" onclick="toChat('화학사고가 발생했습니다. ①-2-1 위기경보를 발령해야 합니다. 경보 발령 기준과 전파 방법, CBS 재난문자 송출 요청 절차를 알려주세요.')">
+            <span class="s-code">①-2-1</span>
+            <span class="s-text">위기경보 발령·CBS</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 현장에 위험구역을 설정해야 합니다. ①-2-3 위험구역 설정 기준과 안내 방법을 알려주세요.')">
+            <span class="s-code">①-2-3</span>
+            <span class="s-text">위험구역 설정</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 현장에 출동 지시와 지원 요청을 해야 합니다. ①-2-6에 따른 현장출동 지시 절차와 관련 연락처를 알려주세요.')">
+            <span class="s-code">①-2-6</span>
+            <span class="s-text">현장출동·지원요청</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('군포시 재난안전대책본부를 가동해야 합니다. ①-3-1~3 가동 기준과 상황 보고 절차를 알려주세요.')">
+            <span class="s-code">①-3</span>
+            <span class="s-text">재난안전대책본부 가동</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('주민에게 실내대피와 대피소 이동 중 어느 쪽을 지시해야 할지 판단하고, 표준 방송 문안을 알려주세요. 매뉴얼 ⑪-1-2~3 기준.')">
+            <span class="s-code">⑪-1-2</span>
+            <span class="s-text">대피권고·실내대피 결정</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('주민 대피명령을 발령해야 합니다. ⑪-1-3 전체 절차(상황판단회의→발령→안내→완료→보고)를 단계별로 알려주세요. 표준 방송 문안 포함.')">
+            <span class="s-code">⑪-1-3</span>
+            <span class="s-text">대피명령 발령 전 과정</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('노인, 장애인 등 안전취약계층의 대피를 관리해야 합니다. ⑪-1-4 취약계층 대피관리 절차를 알려주세요.')">
+            <span class="s-code">⑪-1-4</span>
+            <span class="s-text">취약계층 대피관리</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 현장 교통을 통제해야 합니다. ⑦-1~2, ⑪-2-2 교통대책반 가동과 통제 절차를 알려주세요.')">
+            <span class="s-code">⑦-1</span>
+            <span class="s-text">교통통제·우회로 지정</span>
+            <span class="s-arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="phase-section">
+        <div class="phase-header">
+          <span class="phase-badge badge-red">3단계</span>
+          <span class="phase-title">비상 대응</span>
+        </div>
+        <div class="scenario-grid">
+          <button class="s-btn" onclick="toChat('화학사고 현장응급의료소를 운영해야 합니다. ⑧-2 응급의료소 설치·운영 절차와 관련 기관 역할을 알려주세요.')">
+            <span class="s-code">⑧-2</span>
+            <span class="s-text">현장응급의료소 운영</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 언론 대응과 보도자료 작성이 필요합니다. ⑬-1 재난방송 및 홍보, 오보 대응 절차를 알려주세요.')">
+            <span class="s-code">⑬-1</span>
+            <span class="s-text">재난방송·언론 대응</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 재난관리자원을 동원해야 합니다. ⑥-1 자원 확보부터 동원까지 절차를 알려주세요.')">
+            <span class="s-code">⑥-1</span>
+            <span class="s-text">재난관리자원 동원</span>
+            <span class="s-arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="phase-section">
+        <div class="phase-header">
+          <span class="phase-badge badge-green">4단계</span>
+          <span class="phase-title">수습·복구</span>
+        </div>
+        <div class="scenario-grid">
+          <button class="s-btn" onclick="toChat('대피 주민의 귀가를 허용하려 합니다. ⑪-1-5 대피명령 해제 기준과 절차, 주민 귀가 후 안내사항을 알려주세요.')">
+            <span class="s-code">⑪-1-5</span>
+            <span class="s-text">대피명령 해제 절차</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 이재민을 지원해야 합니다. ②-1~3 이재민 구호, 생활안정지원, 심리지원 절차를 알려주세요.')">
+            <span class="s-code">②-1</span>
+            <span class="s-text">이재민 구호·지원</span>
+            <span class="s-arrow">›</span>
+          </button>
+          <button class="s-btn" onclick="toChat('화학사고 발생 후 상급기관에 상황을 보고해야 합니다. NDMS 보고 방법과 재난상황 보고서 양식을 알려주세요.')">
+            <span class="s-code">보고</span>
+            <span class="s-text">상급기관 보고·NDMS</span>
+            <span class="s-arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ③ 연락망 -->
+  <div class="tab-panel" id="panel-contact">
+    <div class="contact-panel">
+
+      <div class="contact-section">
+        <div class="section-title">위기 경보 수준</div>
+        <div class="level-cards">
+          <div class="level-card lc-blue">
+            <span class="lc-badge">관심 Blue</span>
+            <div class="lc-title">유관기관 정보공유</div>
+            <div class="lc-desc">사고발생·유관기관 간 공유 필요</div>
+          </div>
+          <div class="level-card lc-yellow">
+            <span class="lc-badge">주의 Yellow</span>
+            <div class="lc-title">협조체계 강화</div>
+            <div class="lc-desc">사업장 밖 사상자 발생 예상</div>
+          </div>
+          <div class="level-card lc-orange">
+            <span class="lc-badge">경계 Orange</span>
+            <div class="lc-title">비상대응 가동</div>
+            <div class="lc-desc">사업장 밖 사상자 발생</div>
+          </div>
+          <div class="level-card lc-red">
+            <span class="lc-badge">심각 Red</span>
+            <div class="lc-title">중대본 가동</div>
+            <div class="lc-desc">대규모 사상자·환경피해</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <div class="section-title">군포시 내부 핵심 연락처</div>
+        <div class="contact-card">
+          <a class="contact-row" href="tel:031-390-0732">
+            <div class="contact-icon ci-navy">🏛</div>
+            <div class="contact-info"><div class="contact-name">환경과 (주관부서)</div><div class="contact-dept">화학사고 총괄대응</div></div>
+            <span class="contact-num">0732</span>
+          </a>
+          <a class="contact-row" href="tel:031-390-0449">
+            <div class="contact-icon ci-navy">🛡</div>
+            <div class="contact-info"><div class="contact-name">안전총괄과</div><div class="contact-dept">재난안전상황실</div></div>
+            <span class="contact-num">0449</span>
+          </a>
+          <a class="contact-row" href="tel:031-390-0225">
+            <div class="contact-icon ci-navy">📡</div>
+            <div class="contact-info"><div class="contact-name">재난안전상황실</div><div class="contact-dept">24시간 운영</div></div>
+            <span class="contact-num">0225</span>
+          </a>
+          <a class="contact-row" href="tel:031-390-0222">
+            <div class="contact-icon ci-navy">🌙</div>
+            <div class="contact-info"><div class="contact-name">당직실</div><div class="contact-dept">야간·주말</div></div>
+            <span class="contact-num">0222</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <div class="section-title">긴급 출동 기관</div>
+        <div class="contact-card">
+          <a class="contact-row" href="tel:119">
+            <div class="contact-icon ci-red">🚒</div>
+            <div class="contact-info"><div class="contact-name">군포소방서 (긴급신고)</div><div class="contact-dept">구조·구급·진압</div></div>
+            <span class="contact-num">119</span>
+          </a>
+          <a class="contact-row" href="tel:031-397-9119">
+            <div class="contact-icon ci-red">🚒</div>
+            <div class="contact-info"><div class="contact-name">군포소방서 (직통)</div><div class="contact-dept">현장 협조·구조</div></div>
+            <span class="contact-num">031-397-9119</span>
+          </a>
+          <a class="contact-row" href="tel:031-390-9356">
+            <div class="contact-icon ci-navy">👮</div>
+            <div class="contact-info"><div class="contact-name">군포경찰서</div><div class="contact-dept">교통통제·질서유지</div></div>
+            <span class="contact-num">031-390-9356</span>
+          </a>
+          <a class="contact-row" href="tel:031-461-5465">
+            <div class="contact-icon ci-green">🏥</div>
+            <div class="contact-info"><div class="contact-name">군포시보건소</div><div class="contact-dept">의료·방역지원</div></div>
+            <span class="contact-num">031-461-5465</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <div class="section-title">전문기관·상급기관</div>
+        <div class="contact-card">
+          <a class="contact-row" href="tel:043-830-4132">
+            <div class="contact-icon ci-orange">☣</div>
+            <div class="contact-info"><div class="contact-name">화학물질안전원</div><div class="contact-dept">사고대응·기술지원</div></div>
+            <span class="contact-num">043-830-4132</span>
+          </a>
+          <a class="contact-row" href="tel:031-470-2479">
+            <div class="contact-icon ci-orange">🔬</div>
+            <div class="contact-info"><div class="contact-name">시흥화학재난합동방재센터</div><div class="contact-dept">현장 전문지원</div></div>
+            <span class="contact-num">031-470-2479</span>
+          </a>
+          <a class="contact-row" href="tel:031-790-2879">
+            <div class="contact-icon ci-green">🌿</div>
+            <div class="contact-info"><div class="contact-name">한강유역환경청</div><div class="contact-dept">환경오염 조사</div></div>
+            <span class="contact-num">031-790-2879</span>
+          </a>
+          <a class="contact-row" href="tel:031-8008-5232">
+            <div class="contact-icon ci-navy">🏢</div>
+            <div class="contact-info"><div class="contact-name">경기도 환경보건안전과</div><div class="contact-dept">상급기관 보고</div></div>
+            <span class="contact-num">031-8008-5232</span>
+          </a>
+          <a class="contact-row" href="tel:044-205-6170">
+            <div class="contact-icon ci-navy">🏛</div>
+            <div class="contact-info"><div class="contact-name">행정안전부 환경안전총괄과</div><div class="contact-dept">중앙 보고</div></div>
+            <span class="contact-num">044-205-6170</span>
+          </a>
+          <a class="contact-row" href="tel:031-294-2396">
+            <div class="contact-icon ci-navy">🌤</div>
+            <div class="contact-info"><div class="contact-name">수원기상대</div><div class="contact-dept">기상정보 공유</div></div>
+            <span class="contact-num">031-294-2396</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <div class="section-title">지원기관</div>
+        <div class="contact-card">
+          <a class="contact-row" href="tel:031-290-9349">
+            <div class="contact-icon ci-navy">🪖</div>
+            <div class="contact-info"><div class="contact-name">육군 51사단</div><div class="contact-dept">인력·장비 지원</div></div>
+            <span class="contact-num">031-290-9349</span>
+          </a>
+          <a class="contact-row" href="tel:031-394-1365">
+            <div class="contact-icon ci-green">🤝</div>
+            <div class="contact-info"><div class="contact-name">군포시 자원봉사센터</div><div class="contact-dept">자원봉사 지원</div></div>
+            <span class="contact-num">031-394-1365</span>
+          </a>
+          <a class="contact-row" href="tel:031-230-1624">
+            <div class="contact-icon ci-green">💚</div>
+            <div class="contact-info"><div class="contact-name">경기도 재난심리회복지원센터</div><div class="contact-dept">심리상담 지원</div></div>
+            <span class="contact-num">031-230-1624</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 매뉴얼 정보 -->
+  <div class="tab-panel" id="panel-info">
+    <div class="info-panel">
+
+      <div class="info-card">
+        <div class="info-card-title"><span class="icon">📋</span> 매뉴얼 기본 정보</div>
+        <div class="info-list">
+          <div class="info-item">명칭: 「화학사고 재난」 현장조치 행동매뉴얼</div>
+          <div class="info-item">작성 기관: 군포시 환경과</div>
+          <div class="info-item">최종 개정: 2025년 7월 (경기도 조건부 승인)</div>
+          <div class="info-item">관리 번호: 사회재난-02</div>
+          <div class="info-item">근거 법령: 재난 및 안전관리 기본법 제34조의5, 국가위기관리기본지침(대통령훈령 제454호), 화학사고 위기대응 실무매뉴얼</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title"><span class="icon">🗂</span> 매뉴얼 구성</div>
+        <div class="info-list">
+          <div class="info-item">Ⅰ. 일반사항 (목적·적용범위·위기경보·용어정의)</div>
+          <div class="info-item">Ⅱ. 위기관리체계 (국가체계·군포시 대책본부·비상연락망)</div>
+          <div class="info-item">Ⅲ. 재난대응절차 및 프로세스 (4단계)</div>
+          <div class="info-item">Ⅳ. 단계별 행동요령 (징후감지→초기대응→비상대응→수습복구)</div>
+          <div class="info-item">Ⅴ. 협업체계 (부서별·단계별)</div>
+          <div class="info-item">Ⅵ. 부록 (사업장현황·대피장소·주민행동요령·서식)</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title"><span class="icon">⚡</span> 대응 4단계 구조</div>
+        <div class="info-list">
+          <div class="info-item"><strong>1단계 징후감지:</strong> 사고 발생 징후 확인, 보고·전파, 위기징후 분석·평가</div>
+          <div class="info-item"><strong>2단계 초기대응:</strong> 위기경보 발령, 현장 출동, 위험구역 설정, 대피명령 발령</div>
+          <div class="info-item"><strong>3단계 비상대응:</strong> 재난대책본부 본격 운영, 응급의료, 자원동원, 언론대응</div>
+          <div class="info-item"><strong>4단계 수습복구:</strong> 대피명령 해제, 이재민 지원, 환경복구, 피해보상</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title"><span class="icon">📣</span> 주민 대피 표준 방송 문안</div>
+        <div class="info-list">
+          <div class="info-item"><strong>[실내대피]</strong> [시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, ○○(읍면동)에서는 창문을 닫고 에어컨 중지 후 다음 안내까지 실내 대기 바랍니다.</div>
+          <div class="info-item"><strong>[대피소 이동]</strong> [시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, ○○(읍면동) 지역 주민들은 즉시 대피소로 이동바랍니다.</div>
+          <div class="info-item"><strong>[주민소산]</strong> [시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, 피부노출 최소화 후 코입막고 대피소로 대피 바랍니다.</div>
+          <div class="info-item"><strong>[상황종료]</strong> [시청] 금일 ○○시경 ○○사업장 화학사고 대응 완료, 실내대피 종료하고 일상생활 복귀바랍니다.</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title"><span class="icon">📎</span> AI비서 내장 매뉴얼 출처</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+          <span class="manual-badge">📋 군포시 화학사고 현장조치 행동매뉴얼 2025.7</span>
+          <span class="manual-badge">⚖ 재난 및 안전관리 기본법</span>
+          <span class="manual-badge">☣ 화학물질관리법</span>
+          <span class="manual-badge">🏢 행안부 대피명령 세부지침 2021</span>
+          <span class="manual-badge">📡 화학사고 위기대응 실무매뉴얼</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── 군포시 매뉴얼 내장 ── */
+const MANUAL = `
+=== 군포시 「화학사고 재난」 현장조치 행동매뉴얼 (2025.7 최신, 관리번호 사회재난-02) ===
+[재난관리주관기관: 환경부 / 실무기관: 군포시 환경과]
+
+━━━ Ⅰ. 위기 경보 수준 ━━━
+▸ 관심(Blue): 화학물질 유출·누출사고 발생, 유관기관 정보공유 필요
+▸ 주의(Yellow): 확대되어 사업장 밖 다수 사상자나 광범위한 환경피해 예상
+▸ 경계(Orange): 사업장 밖 사상자나 환경피해 실제 발생 → 비상대응체계 가동, 중앙사고수습본부(환경부)
+▸ 심각(Red): 대규모 사상자·대규모 환경피해 지속 → 중앙재난안전대책본부(행안부)
+
+━━━ Ⅱ. 군포시 내부 비상연락망 ━━━
+안전총괄과(재난안전상황실): 031-390-0449
+환경과(주관부서): 031-390-0732 / FAX: 031-390-0232
+재난안전상황실: 031-390-0225
+당직실(야간/주말): 031-390-0222
+교통행정과: 031-390-0841
+보건행정과: 031-390-8905
+복지정책과: 031-390-0673
+홍보실: 031-390-0963
+보건소: 031-461-5465
+환경과장: 031-390-0230
+안전환경국장: 031-390-0031
+
+━━━ Ⅱ. 유관기관 연락처 ━━━
+군포소방서(긴급): 119 / 직통: 031-397-9119 / FAX: 031-397-1119
+군포경찰서: 031-390-9356
+화학물질안전원: 043-830-4132
+시흥화학재난합동방재센터: 031-470-2479
+한강유역환경청: 031-790-2879
+수원기상대: 031-294-2396
+경기도 환경보건안전과: 031-8008-5232
+행안부 환경안전총괄과: 044-205-6170
+환경부 화학안전과: 044-201-6831
+육군 51사단: 031-290-9349
+군포시 자원봉사센터: 031-394-1365
+경기도 재난심리회복지원센터: 031-230-1624
+
+━━━ Ⅳ-1. 징후감지 단계 행동요령 ━━━
+[코드 ①-1-1] 위기징후 감시 (주관: 안전총괄과, 환경과 / 협업: 군포소방서)
+- 기상상황, 위험예보/동향파악, CCTV·센서·현장예찰 모니터링, 점검/진단, 외부매체 징후파악
+
+[코드 ①-1-2] 위기징후 접수 및 파악 (주관: 안전총괄과 / 협업: 소방서, 경찰서)
+접수경로:
+- 민원인(방문·전화) → 안전총괄과(0449) / 환경과(0732) / 재난안전상황실(0225) / 당직실(0222) / 119종합상황실(031-397-9119)
+- 군포소방서·경찰서 등 유관기관으로부터 전달
+접수 시 6하원칙 확인사항:
+① 접수시간, 접수자 인적사항(이름/연락처)
+② 발생 일시, 장소
+③ 현상 및 원인
+④ 현장 조치사항
+⑤ 피해발생 가능성
+⑥ 사실 확인 및 추가 정보 수집
+
+[코드 ①-1-3] 위기징후 보고 및 전파 (주관: 안전총괄과, 환경과)
+전파체계: 안전총괄과·환경과 → 지원부서·유관기관 전파
+보고체계:
+- 내부: 담당과장 → 담당국장 → 부시장 → 시장
+- 외부: 경기도 환경보건안전과(031-8008-5232) → 행안부(044-205-6170) → 환경부(044-201-6831)
+전파방법: 유·무선(재난안전통신망 PS-LTE 포함), SMS, 공문, NDMS / 긴급시 선 구두보고 후 문서
+
+[코드 ①-1-4] 위기징후 분석 및 평가 (주관: 환경과)
+- 징후 감지 24시간 이내 '정보분석·평가회의' 개최 (환경과장 주관)
+- 회의에서 위기대응 수준 결정 및 위기경보 단계 신속 결정
+- 위기경보 '심각' 단계 발령 시 대통령비서실, 행안부와 사전협의
+
+━━━ Ⅳ-2. 초기대응 단계 행동요령 ━━━
+
+[코드 ①-2-1] 위기경보 발령 (주관: 안전총괄과, 환경과)
+발령 시기: 교통혼란·침수·고립 등 피해확대 예상 시
+전파 방법:
+- 마을앰프·가두방송 차량 (관할동)
+- 자동음성통보시스템 (안전총괄과)
+- 긴급재난문자(CBS) 송출요청 (안전총괄과)
+  * CBS 발송 권한: 행안부장관, 시도지사 / 시장·군수·구청장은 사전협의된 문자 직접 방송사업자에 요청 가능
+  * 발송 시기: 상황판단회의 실시 후 결정
+- TV 자막방송(DITS) 요청 (홍보실)
+- 민방위 경보시설 활용 (안전총괄과)
+  * 시/군/구는 시/도 민방위경보통제소에 경보전달 요청
+  * 재난경계경보: 음성방송 / 재난위험경보: 음성방송+사이렌
+- 전광판, 자동우량경보시설 (안전총괄과, 홍보실)
+- (필요시) 유선연락 및 방문 (안전총괄과, 관할동)
+
+[코드 ①-2-3] 위험구역 설정 (주관: 시장/안전총괄과/환경과 / 지원: 홍보실·행정지원과·관할동)
+- 근거: 재난 및 안전관리 기본법 제41조
+- 시장과 지역통제단장(소방서장)이 협의하여 설정
+- 위험구역 설정 후 금지·제한 행위 내용 게시
+- 마을앰프·자동음성통보·문자전광판·지역TV·라디오 활용 안내
+
+[코드 ①-2-6] 현장 출동 및 지원 요청 (주관: 환경과 / 협업: 소방서, 경찰서)
+관련 연락처:
+- 건설과: 031-390-0358 (농업기반·하천·도로·교량 초동조치)
+- 수도과: 031-390-3242
+- 하수과: 031-390-3273
+- 교통행정과: 031-390-0394 (신호기 등 교통안전시설)
+- 건축과: 031-390-0320 (건축물 피해확인)
+- 군포소방서: 031-397-9119 (구조·구급·의료지원)
+- 군포경찰서: 031-390-9356 (현장질서유지·교통정리)
+
+[코드 ①-3-1~3] 재난안전대책본부 가동
+- 가동 기준: 화학사고 경계(Orange) 이상 발령 또는 시장 판단
+- NDMS(재난안전관리시스템)에 재난대응반 신설
+- 보고: 환경과장(031-390-0230) → 안전환경국장(031-390-0031)
+
+━━━ 주민대피 전체 절차 ━━━
+
+[코드 ⑪-1-2] 사전대피 권고 (주관: 안전총괄과, 환경과)
+- 취약계층(어린이, 노인, 장애인) 현황 파악
+- 소방·경찰·화학물질안전원과 협의 후 사전대피 결정
+- 대피요원 현장배치
+
+[코드 ⑪-1-3] 대피명령 발령 (주관: 시장/안전총괄과/환경과)
+발령 권한: 군포시장, 재난안전대책본부장, 긴급구조통제단장(소방서장) - 근거: 재난안전법 제40조
+1. 상황 확인 (재난 발생 또는 발생 우려)
+2. 상황판단회의 개최 (주재: 발령권자 / 참석: 소방·경찰·관할동장 등)
+   결정사항: 발령지역 범위, 대피대상, 대피소 운영여부, 교통수단·대피경로, 협업체계 범위
+3. 대피명령 발령 및 통지 (가능한 모든 수단 활용)
+   - CBS, 방송, SNS, 전화, 팩스, 민방위경보, 확성기, 앰프, 이동차량, 순찰차
+   - 위반 시 과태료 부과 안내
+4. 대피명령 지시: 재난총괄담당관 → 현장책임관(관할동장) → 마을별 현장대피 담당자
+5. 강제대피: 불응자 있을 경우 경찰·소방 협조로 강제 대피, 대피명령 위반 확인서 징구
+6. 대피완료 후 NDMS 보고
+
+주민대피 표준 방송 문안:
+[실내대피] "[시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, ○○(읍면동)에서는 창문을 닫고 에어컨 중지 후 다음 안내까지 실내 대기 바랍니다."
+[대피소이동] "[시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, ○○(읍면동) 지역 주민들은 즉시 대피소로 이동바랍니다."
+[주민소산] "[시청] 금일 ○○(읍면동) ○○사업장에서 ○○물질 누출 발생, 피부노출 최소화 후 코입막고 대피소로 대피 바랍니다."
+[상황종료] "[시청] 금일 ○○시경 ○○(읍면동) ○○사업장에서 발생한 화학사고 대응 완료, 실내대피 종료하고 일상생활 복귀바랍니다."
+
+[코드 ⑪-1-4] 취약계층 대피관리 (주관: 안전총괄과, 환경과 / 지원: 보건소, 복지정책과)
+- 1차 담당자: 지역주민·지자체공무원·유관기관 직원
+- 2차 담당자: 수시 현장확인 가능 공무원
+- 지역자율방재단·보건지소 방문건강관리인력 활용
+- 외딴집 거동불편자 누락 방지 세밀 조사
+
+[코드 ⑪-1-5] 대피명령 해제
+- 화학물질안전원·지방환경청·보건소 합동 안전확인 후 해제
+- 귀가 후 주의사항 안내(환기·세척요령·이상증상 신고)
+
+━━━ 교통통제 (코드 ⑦-1, ⑪-2-2) ━━━
+- 군포시 + 군포경찰서 협조하여 통제구간 결정
+- 교통방송·VMS(도로문자전광판)·SNS·SMS 활용 상황전파
+- 긴급차량 통행로 우선 확보
+- 우회도로 설정 및 실시간 정보 전파
+
+━━━ 재난상황 보고 체계 ━━━
+보고서 양식 주요 항목:
+1. 발생일시·장소·상황개요(사고원인)
+2. 피해상황: 인명피해(사망·실종·부상), 재산피해
+3. 대응현황: 시간대별 조치, 동원인력·장비
+4. 향후 조치계획
+보고방법: NDMS 입력, 유무선, SMS, 공문
+보고주기: 초기 매 시간 → 재난기간 중 1일 4회(04시, 09시, 15시, 21시)
+외부보고: 경기도 환경보건안전과 → 행안부 중앙재난안전상황실(044-205-1542)
+
+━━━ 의료·방역 지원 (코드 ⑧) ━━━
+주관: 보건소(031-461-5465)
+- 군포소방서(031-397-9119): 의료방역현황 파악, 사망자 임시영안실 지원
+- 경기도(031-8008-8449): 방역인력·물품 제공
+- 질병관리청(043-719-7114): 방역활동 지원
+
+━━━ 협업체계 지원기관 ━━━
+전국재해구호협회: 02-6956-2595 (구호물품·급식)
+대한적십자사 경기도지사: 031-230-0623
+경기도교육청: 031-249-0683 (학교 임시휴교·대피시설 개방)
+경기도 재난심리회복지원센터: 031-230-1624
+`;
+
+const SYSTEM = `당신은 군포시 「화학사고 재난 현장조치 행동매뉴얼」(2025년 7월, 관리번호 사회재난-02) 전문 AI비서입니다.
+
+[사용자] 군포시청 재난·환경 담당 공무원 (시·군·구청 담당자)
+[디바이스] 스마트폰 (현장 사용)
+
+[답변 원칙]
+1. 반드시 아래 [내장 매뉴얼]을 최우선 근거로 답변하십시오.
+2. 매뉴얼 코드번호(예: [코드 ①-1-2])를 답변에 명시하십시오.
+3. 행동 지침은 반드시 번호 순서 목록으로 제시하십시오.
+4. 모바일 화면에 맞게 간결하고 핵심 위주로 답변하십시오.
+5. 매뉴얼에 없는 내용은 관련 법령 기준으로 보충하고 "※매뉴얼 외" 표시하십시오.
+6. 방송 문안, 보고서 양식 등 실무 서식은 요청 즉시 작성 제공하십시오.
+7. 모든 답변 끝에 긴급 연락처를 포함하십시오.
+
+[답변 레이블]
+🔴 [즉각조치]: 지금 당장 해야 할 행동
+🟡 [주의사항]: 반드시 확인·주의할 사항
+🟢 [협력기관]: 연계해야 할 기관과 역할
+📋 [매뉴얼근거]: 해당 코드번호
+
+[내장 매뉴얼]
+${MANUAL}`;
+
+let history = [];
+let busy = false;
+
+/* 유틸 */
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function now() {
+  return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+}
+function scrollEnd() {
+  const m = document.getElementById('messages');
+  requestAnimationFrame(() => { m.scrollTop = m.scrollHeight; });
+}
+function removeWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+/* 메시지 포맷팅 */
+function fmtAI(txt) {
+  return esc(txt)
+    .replace(/🔴 \[즉각조치\]/g,'<span class="tag-red">🔴 [즉각조치]</span>')
+    .replace(/🟡 \[주의사항\]/g,'<span class="tag-orange">🟡 [주의사항]</span>')
+    .replace(/🟢 \[협력기관\]/g,'<span class="tag-green">🟢 [협력기관]</span>')
+    .replace(/📋 \[매뉴얼근거\]/g,'<span class="tag-blue">📋 [매뉴얼근거]</span>')
+    .replace(/\[코드 ([\①-⑬\d\-]+)\]/g,'[<span class="code-chip">$1</span>]')
+    .replace(/【([\①-⑬\d\-]+)】/g,'【<span class="code-chip">$1</span>】')
+    .replace(/\n/g,'<br>');
+}
+
+/* 메시지 추가 */
+function addUser(txt) {
+  removeWelcome();
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `<div class="msg-meta"><span class="meta-role">담당자</span><span>${now()}</span></div><div class="msg-bubble">${esc(txt)}</div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollEnd();
+}
+
+function showTyping() {
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'msg ai typing-wrap';
+  d.innerHTML = `<div class="msg-meta"><span class="meta-role">AI비서</span><span>답변 생성 중...</span></div><div class="typing-bubble"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollEnd();
+}
+function rmTyping() { const t = document.getElementById('typing'); if(t)t.remove(); }
+
+function addAI(txt) {
+  rmTyping();
+  const d = document.createElement('div');
+  d.className = 'msg ai';
+  d.innerHTML = `<div class="msg-meta"><span class="meta-role">AI비서 (매뉴얼 기반)</span><span>${now()}</span></div><div class="msg-bubble">${fmtAI(txt)}</div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollEnd();
+}
+
+/* 전송 */
+async function sendMessage() {
+  if (busy) return;
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = ''; inp.style.height = 'auto';
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+
+  addUser(txt);
+  history.push({ role: 'user', content: txt });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || '응답 오류. 잠시 후 다시 시도하세요.';
+    history.push({ role: 'assistant', content: reply });
+    addAI(reply);
+  } catch(e) {
+    addAI('⚠ 연결 오류. 긴급 시 군포소방서 ☎ 031-397-9119 또는 환경과 ☎ 031-390-0732로 연락하십시오.');
+  }
+
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('chat-input').focus();
+}
+
+function sendQ(txt) {
+  switchTab('chat', document.querySelector('.tab-btn'));
+  document.getElementById('chat-input').value = txt;
+  sendMessage();
+}
+
+function toChat(txt) {
+  // 시나리오 탭 → 챗 탭으로 이동 후 질문
+  const chatBtn = document.querySelector('.tab-btn');
+  switchTab('chat', chatBtn);
+  setTimeout(() => {
+    document.getElementById('chat-input').value = txt;
+    sendMessage();
+  }, 50);
+}
+
+/* 탭 전환 */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  // 탭 버튼 활성화
+  const allBtns = document.querySelectorAll('.tab-btn');
+  const map = { chat: 0, scenario: 1, contact: 2, info: 3 };
+  allBtns[map[id]].classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>
